@@ -17,7 +17,7 @@ And add this to your crate root:
 extern crate rust_spoa;
 ```
 
-For description of the API, see [the documentation](https://docs.rs/rust-spoa/0.1.0/rust_spoa/):
+For description of the API, see [the documentation](https://docs.rs/rust-spoa/0.2.0/rust_spoa/):
 Example usage:
 ```
 extern crate rust_spoa;
@@ -28,7 +28,6 @@ fn main() {
     let mut seqs = vec![];
 
     // generated each string by adding small tweaks to the expected consensus "AATGCCCGTT"
-    // convert sequences to Vec<u8>
     for seq in ["ATTGCCCGTT",
         "AATGCCGTT",
         "AATGCCCGAT",
@@ -38,14 +37,10 @@ fn main() {
         seqs.push((*seq).bytes().map(|x|{x as u8}).collect::<Vec<u8>>());
     }
 
-    // length of consensus vec is an upper bound on the output consensus length
-    let consensus_max_len = 20;
-    let mut consensus: Vec<u8> = vec![0u8; consensus_max_len];
-
-    // generate consensus sequence
-    poa_consensus(&seqs, &mut consensus, 1, 5, -4, -3, -1);
+    let consensus = poa_consensus(&seqs, 20, 1, 5, -4, -3, -1);
 
     let expected = "AATGCCCGTT".to_string().into_bytes();
     assert_eq!(consensus, expected);
 }
+
 ```

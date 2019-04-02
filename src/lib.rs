@@ -24,16 +24,21 @@ extern "C" {
 /// # Arguments
 ///
 /// * `seqs` - a vector holding the sequences (each as a vector of u8) to form a consensus from
-/// * `consensus` - a mutable vector that will hold the output consensus. The vector must be longer than the expected consensus length. If the output consensus sequence is longer than this vector, it will be truncated to fit. If the output consensus is shorter, the vector will be truncated to the appropriate length.
+/// * `consensus_max_len` - The upper bound for the output consensus length. If the output consensus sequence is longer than this value, it will be truncated to this length. Setting a large value uses more memory and runtime, since a buffer of this size is allocated internally.
 /// * `alignment_type` - alignment mode: 0 = local, 1 = global, 2 = gapped
 /// * `match_score` - the match score for alignment
 /// * `mismatch_score` - the mismatch score for alignment
 /// * `gap_open` - the gap open score for alignment
 /// * `gap_extend` - the gap extend score for alignment
 ///
+/// # Returns
+/// * returns the consensus of the input sequences as a vector of u8
+///
 /// # Examples
 ///
 /// ```
+///     use rust_spoa::poa_consensus;
+///
 ///     fn test_dna_consensus() {
 ///        let mut seqs = vec![];
 ///
@@ -48,12 +53,8 @@ extern "C" {
 ///            seqs.push((*seq).bytes().map(|x|{x as u8}).collect::<Vec<u8>>());
 ///        }
 ///
-///        // length of consensus vec is an upper bound on the output consensus length
-///        let consensus_max_len = 20;
-///        let mut consensus: Vec<u8> = vec![0u8; consensus_max_len];
-///
 ///        // generate consensus sequence
-///        poa_consensus(&seqs, &mut consensus, 1, 5, -4, -3, -1);
+///        let consensus = poa_consensus(&seqs, 20, 1, 5, -4, -3, -1);
 ///
 ///        let expected = "AATGCCCGTT".to_string().into_bytes();
 ///        assert_eq!(consensus, expected);
@@ -62,24 +63,26 @@ extern "C" {
 
 pub fn poa_consensus(
     seqs: &Vec<Vec<u8>>,
-    consensus: &mut Vec<u8>,
+    consensus_max_length: usize,
     alignment_type: i32,
     match_score: i32,
     mismatch_score: i32,
     gap_open: i32,
     gap_extend: i32
-) {
+) -> Vec<u8> {
+
+    let mut consensus: Vec<u8> = vec![0; consensus_max_length];
+
+    let num_seqs = seqs.len() as i32;
+    let consensus_len = consensus.len() as i32;
+
+    let mut seq_ptrs: Vec<*const u8> = Vec::with_capacity(seqs.len());
+
+    for seq in seqs {
+        seq_ptrs.push(seq.as_ptr());
+    }
 
     unsafe {
-
-        let num_seqs = seqs.len() as i32;
-        let consensus_len = consensus.len() as i32;
-
-        let mut seq_ptrs: Vec<*const u8> = Vec::with_capacity(seqs.len());
-
-        for seq in seqs {
-            seq_ptrs.push(seq.as_ptr());
-        }
 
         let len = poa_func(
             seq_ptrs.as_ptr(),
@@ -95,6 +98,9 @@ pub fn poa_consensus(
 
         consensus.truncate(len as usize);
     }
+
+
+    consensus
 }
 
 
@@ -116,10 +122,7 @@ mod tests {
             seqs.push((*seq).bytes().map(|x|{x as u8}).collect::<Vec<u8>>());
         }
 
-        let consensus_max_len = 20;
-        let mut consensus: Vec<u8> = vec![0u8; consensus_max_len];
-
-        poa_consensus(&seqs, &mut consensus, 1, 5, -4, -3, -1);
+        let consensus = poa_consensus(&seqs, 20, 1, 5, -4, -3, -1);
 
         let expected = "AATGCCCGTT".to_string().into_bytes();
         assert_eq!(consensus, expected);
@@ -139,10 +142,7 @@ mod tests {
             seqs.push(seq.chars().into_iter().map(|x|{x as u8}).collect::<Vec<u8>>());
         }
 
-        let consensus_max_len = 20;
-        let mut consensus: Vec<u8> = vec![0u8; consensus_max_len];
-
-        poa_consensus(&seqs, &mut consensus, 1, 5, -4, -3, -1);
+        let consensus = poa_consensus(&seqs, 20, 1, 5, -4, -3, -1);
 
         let expected = "FNLKPSWDDCQ".to_string().into_bytes();
         assert_eq!(consensus, expected);
