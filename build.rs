@@ -16,7 +16,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=spoa");
 
     let out_dir = env::var("OUT_DIR").unwrap();
-    println!("cargo:rustc-flags=-L {}/lib64/", &out_dir);
+    println!("cargo:rustc-flags=-L {}/lib64/ -L {}/lib/", &out_dir, &out_dir);
 
     cc::Build::new()
         .cpp(true)
@@ -27,7 +27,7 @@ fn main() {
         .flag_if_supported("-Wall")
         .flag_if_supported("-std=c++11")
         .flag_if_supported("-Isrc/spoa/include")
-        .flag_if_supported(&format!("-L{}/lib64", &out_dir))
+        .flag_if_supported(&format!("-L{}/lib64 -L{}/lib", &out_dir, &out_dir))
         .flag_if_supported("-lspoa")
         .file("src/poa_func.cpp")
         .compile("poa_func");
