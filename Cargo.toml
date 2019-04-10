@@ -1,6 +1,6 @@
 [package]
 name = "rust-spoa"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Peter Edge <edge.peterj@gmail.com>"]
 edition = "2018"
 license = "MIT"
