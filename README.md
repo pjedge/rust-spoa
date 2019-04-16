@@ -17,7 +17,7 @@ And add this to your crate root:
 extern crate rust_spoa;
 ```
 
-For description of the API, see [the documentation](https://docs.rs/rust-spoa/0.2.3/rust_spoa/):
+For description of the API, see [the documentation](https://docs.rs/rust-spoa/0.2.4/rust_spoa/):
 Example usage:
 ```
 extern crate rust_spoa;
