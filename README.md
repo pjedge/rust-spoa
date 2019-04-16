@@ -17,7 +17,7 @@ And add this to your crate root:
 extern crate rust_spoa;
 ```
 
-For description of the API, see [the documentation](https://docs.rs/rust-spoa/0.2.0/rust_spoa/):
+For description of the API, see [the documentation](https://docs.rs/rust-spoa/0.2.3/rust_spoa/):
 Example usage:
 ```
 extern crate rust_spoa;
@@ -28,12 +28,12 @@ fn main() {
     let mut seqs = vec![];
 
     // generated each string by adding small tweaks to the expected consensus "AATGCCCGTT"
-    for seq in ["ATTGCCCGTT",
-        "AATGCCGTT",
-        "AATGCCCGAT",
-        "AACGCCCGTC",
-        "AGTGCTCGTT",
-        "AATGCTCGTT"].iter() {
+    for seq in ["ATTGCCCGTT\0",
+        "AATGCCGTT\0",
+        "AATGCCCGAT\0",
+        "AACGCCCGTC\0",
+        "AGTGCTCGTT\0",
+        "AATGCTCGTT\0"].iter() {
         seqs.push((*seq).bytes().map(|x|{x as u8}).collect::<Vec<u8>>());
     }
 
